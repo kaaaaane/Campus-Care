@@ -1,0 +1,2441 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campus Care | Facilities Portal</title>
+
+<style>
+:root {
+  --green: #174d37;
+  --green2: #286a49;
+  --pale: #eaf4ed;
+  --bg: #f5f8f5;
+  --ink: #1c2a21;
+  --muted: #78857c;
+  --line: #e4ebe5;
+  --amber: #a76a0a;
+  --blue: #2d7185;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 14px/1.5 "Segoe UI", Arial, sans-serif;
+}
+
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+body:not(.signed-in) .sidebar,
+body:not(.signed-in) .main { display: none; }
+
+.landing-screen {
+  display: none;
+  min-height: 100vh;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+body:not(.signed-in):not(.auth-open) .landing-screen { display: flex; }
+
+.landing-header {
+  width: min(100%, 1300px);
+  min-height: 82px;
+  margin: 0 auto;
+  padding: 14px 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.landing-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing-brand strong {
+  display: block;
+  color: var(--green);
+  font-size: 16px;
+}
+
+.landing-brand small {
+  display: block;
+  margin-top: 3px;
+  color: #8a968d;
+  font-size: 9px;
+  letter-spacing: 1.3px;
+}
+
+.landing-header-actions,
+.landing-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing-content {
+  width: min(100%, 1300px);
+  flex: 1;
+  margin: 0 auto;
+  padding: 48px 38px 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);
+  align-items: center;
+  gap: 64px;
+}
+
+.landing-copy h1 {
+  max-width: 620px;
+  margin: 0;
+  color: var(--ink);
+  font-size: 48px;
+  line-height: 1.1;
+}
+
+.landing-copy > p:not(.eyebrow) {
+  max-width: 480px;
+  margin: 18px 0 24px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.landing-actions { flex-wrap: wrap; }
+
+.landing-issue-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.landing-issue {
+  min-height: 84px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: white;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.landing-issue img {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.landing-footer {
+  min-height: 54px;
+  padding: 16px 38px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+  text-align: center;
+}
+
+.login-screen {
+  min-height: 100vh;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+body.auth-open:not(.signed-in) .login-screen { display: flex; }
+
+.login-panel {
+  width: min(100%, 410px);
+}
+
+.login-panel.wide { width: min(100%, 620px); }
+
+.account-switches,
+.auth-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #f7faf7;
+  margin-bottom: 12px;
+}
+
+.account-switches button,
+.auth-mode-switch button {
+  padding: 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #637168;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.account-switches button.active,
+.auth-mode-switch button.active {
+  background: white;
+  color: var(--green);
+  box-shadow: 0 1px 4px #173a2115;
+}
+
+.auth-mode-switch { margin-bottom: 20px; }
+
+.auth-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 12px;
+}
+
+.auth-fields .full { grid-column: 1 / -1; }
+
+.auth-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.auth-fieldset[hidden],
+.auth-registration[hidden],
+.auth-login[hidden] { display: none; }
+
+.auth-error {
+  min-height: 18px;
+  margin: 12px 0 0;
+  color: #a34b27;
+  font-size: 11px;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.profile-field {
+  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+  min-width: 0;
+}
+
+.profile-field span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-bottom: 4px;
+}
+
+.profile-field strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+
+.faculty-tools { margin-top: 16px; }
+
+.logout-button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 8px 10px;
+  text-align: left;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #637168;
+  font-size: 11px;
+}
+
+.logout-button:hover { background: var(--pale); color: var(--green); }
+
+.login-brand {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.login-brand strong {
+  display: block;
+  color: var(--green);
+  font-size: 16px;
+}
+
+.login-brand small {
+  display: block;
+  margin-top: 3px;
+  color: #8a968d;
+  font-size: 9px;
+  letter-spacing: 1.3px;
+}
+
+.login-card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 30px;
+  box-shadow: 0 12px 35px #173a2110;
+}
+
+.login-card h1 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.login-card > p {
+  margin: 8px 0 22px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.login-card label {
+  display: block;
+  margin: 16px 0 7px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.login-card input,
+.login-card select,
+.login-card textarea {
+  width: 100%;
+  border: 1px solid #dfe6e0;
+  border-radius: 8px;
+  padding: 11px 12px;
+  background: white;
+  color: var(--ink);
+  outline: none;
+}
+
+.login-card input:focus,
+.login-card select:focus,
+.login-card textarea:focus {
+  border-color: #6d9b7c;
+  box-shadow: 0 0 0 3px #eaf4ed;
+}
+
+.login-card .primary {
+  width: 100%;
+  margin-top: 22px;
+}
+
+.login-note {
+  margin: 18px 0 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.auth-back {
+  display: block;
+  margin: -12px 0 12px;
+}
+
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 245px;
+  background: white;
+  border-right: 1px solid var(--line);
+  padding: 25px 17px;
+  display: flex;
+  flex-direction: column;
+  z-index: 5;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 5px 35px;
+}
+
+.logo {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+}
+
+.brand strong {
+  display: block;
+  font-size: 16px;
+  letter-spacing: -.4px;
+  color: var(--green);
+}
+
+.brand small {
+  display: block;
+  color: #8a968d;
+  font-size: 9px;
+  letter-spacing: 1.3px;
+  margin-top: 3px;
+}
+
+.nav-label {
+  padding: 0 12px 10px;
+  color: #98a29a;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+}
+
+nav { display: grid; gap: 5px; }
+
+nav button {
+  border: 0;
+  background: transparent;
+  text-align: left;
+  color: #637168;
+  padding: 12px;
+  border-radius: 9px;
+  font-weight: 600;
+}
+
+nav button:hover,
+nav button.active {
+  background: var(--pale);
+  color: var(--green);
+}
+
+.nav-count {
+  float: right;
+  background: white;
+  border-radius: 6px;
+  padding: 1px 7px;
+}
+
+.sidebar-bottom { margin-top: auto; }
+
+.help {
+  border: 1px solid var(--line);
+  background: #fafcf9;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+
+.help strong { font-size: 12px; }
+
+.help p {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.link-btn {
+  border: 0;
+  background: transparent;
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.user {
+  border-top: 1px solid var(--line);
+  padding: 16px 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #dcebe0;
+  color: var(--green);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.user small {
+  display: block;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.main {
+  margin-left: 245px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: 66px;
+  background: white;
+  border-bottom: 1px solid var(--line);
+  padding: 0 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.topbar strong { color: var(--ink); }
+.online { color: #477b56; }
+
+.page {
+  display: none;
+  width: 100%;
+  max-width: 1300px;
+  padding: 34px 38px;
+  margin: 0 auto;
+  flex: 1;
+}
+
+.page.active {
+  display: block;
+  animation: appear .18s ease;
+}
+
+@keyframes appear {
+  from { opacity: .6; transform: translateY(3px); }
+  to { opacity: 1; transform: none; }
+}
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: #849188;
+  margin: 0 0 9px;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.heading h1 {
+  font-size: 28px;
+  letter-spacing: -1px;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.muted {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 8px 0 0;
+}
+
+.primary, .secondary, .light-btn {
+  border-radius: 9px;
+  padding: 11px 15px;
+  font-size: 12px;
+  font-weight: 700;
+  transition: .18s;
+}
+
+.primary {
+  border: 1px solid var(--green);
+  background: var(--green);
+  color: white;
+  box-shadow: 0 4px 10px #174d3716;
+}
+
+.primary:hover {
+  background: #103b29;
+  transform: translateY(-1px);
+}
+
+.secondary {
+  border: 1px solid var(--line);
+  background: white;
+  color: #526057;
+}
+
+.banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(110deg, #174d37, #2d7650);
+  color: white;
+  padding: 29px 31px;
+  margin-bottom: 30px;
+  min-height: 200px;
+}
+
+.banner::after {
+  content: "✳";
+  position: absolute;
+  right: 8%;
+  top: -38px;
+  font-size: 200px;
+  color: #ffffff12;
+  pointer-events: none;
+}
+
+.banner .eyebrow { color: #c4e0cc; }
+
+.banner h2 {
+  font-size: 23px;
+  letter-spacing: -.5px;
+  margin: 13px 0 8px;
+}
+
+.banner p:not(.eyebrow) {
+  color: #dfede3;
+  font-size: 12px;
+  max-width: 470px;
+}
+
+.light-btn {
+  border: 0;
+  background: white;
+  color: var(--green);
+  margin-top: 10px;
+}
+
+.section-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 26px 0 14px;
+}
+
+.section-title { font-size: 15px; margin: 0; }
+.hint { font-size: 10px; color: var(--muted); }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 27px;
+}
+
+.card {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 18px;
+  box-shadow: 0 7px 25px #173a2110;
+}
+
+.stat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.green { background: #e9f4eb; color: #31704b; }
+.amber { background: #fff4df; color: #a76a0a; }
+.blue { background: #e8f5f8; color: #2d7185; }
+
+.stat-number {
+  font-size: 29px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin: 13px 0 3px;
+}
+
+.stat-label { font-size: 12px; color: #657269; }
+
+.stat-foot {
+  border-top: 1px solid #f0f2f0;
+  margin-top: 12px;
+  padding-top: 10px;
+  color: #879188;
+  font-size: 10px;
+}
+
+.report-list { display: grid; gap: 9px; }
+
+.report-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 13px 15px;
+  min-width: 0;
+}
+
+.report-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  background: #eff5f0;
+  color: var(--green);
+  border-radius: 10px;
+  font-size: 18px;
+}
+
+.report-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.report-info { flex: 1; min-width: 0; }
+.report-info strong { font-size: 12px; }
+
+.report-info p {
+  font-size: 10px;
+  color: #89958c;
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.report-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.report-actions .secondary {
+  padding: 7px 10px;
+  font-size: 10px;
+}
+
+.report-actions .status { margin-left: 0; }
+
+.report-history {
+  flex: 1 0 100%;
+  border-top: 1px solid var(--line);
+  margin-top: 3px;
+  padding-top: 10px;
+  min-width: 0;
+}
+
+.report-history summary {
+  color: var(--green);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.report-history-body { padding-top: 12px; }
+
+.report-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 16px;
+  margin: 0 0 14px;
+}
+
+.report-detail-grid div { min-width: 0; }
+.report-detail-grid .full { grid-column: 1 / -1; }
+.report-detail-grid dt { color: var(--muted); font-size: 10px; }
+.report-detail-grid dd { margin: 3px 0 0; font-size: 11px; overflow-wrap: anywhere; }
+
+.history-timeline { display: grid; gap: 0; }
+
+.history-event {
+  position: relative;
+  border-left: 2px solid #dce9df;
+  padding: 0 0 14px 14px;
+  margin-left: 4px;
+}
+
+.history-event:last-child { border-left-color: transparent; padding-bottom: 0; }
+.history-event strong { display: block; font-size: 11px; }
+.history-event time, .history-event p { color: var(--muted); font-size: 10px; }
+.history-event p { margin: 3px 0 0; }
+
+.status {
+  font-size: 9px;
+  font-weight: 800;
+  border-radius: 5px;
+  padding: 5px 8px;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.pending { background: #eff1f0; color: #69756d; }
+.inprogress { background: #fff4dc; color: #a76a0a; }
+.resolved { background: #e9f5eb; color: #35744a; }
+.dismissed { background: #fbece8; color: #9b4934; }
+
+.note {
+  background: #eff6ef;
+  border-radius: 10px;
+  padding: 13px 15px;
+  margin-top: 18px;
+  color: #42664b;
+  font-size: 11px;
+}
+
+.form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(230px, .8fr);
+  gap: 18px;
+  align-items: start;
+  margin-top: 24px;
+}
+
+.form-card h2, .tips h2 {
+  font-size: 16px;
+  margin: 0 0 5px;
+}
+
+.form-card label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  margin: 18px 0 7px;
+}
+
+.form-card input,
+.form-card select,
+.form-card textarea,
+.toolbar input,
+.toolbar select,
+.maintenance-search {
+  width: 100%;
+  border: 1px solid #dfe6e0;
+  border-radius: 8px;
+  padding: 11px 12px;
+  background: white;
+  color: var(--ink);
+  outline: none;
+}
+
+.form-card textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.form-card input:focus,
+.form-card select:focus,
+.form-card textarea:focus,
+.toolbar input:focus,
+.toolbar select:focus,
+.maintenance-search:focus {
+  border-color: #6d9b7c;
+  box-shadow: 0 0 0 3px #eaf4ed;
+}
+
+.form-card input[type=file] {
+  font-size: 11px;
+  background: #fafcf9;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  border-top: 1px solid var(--line);
+  margin-top: 22px;
+  padding-top: 18px;
+}
+
+.step {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.step span {
+  flex: 0 0 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: var(--pale);
+  color: var(--green);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.step strong { font-size: 11px; }
+
+.step p {
+  font-size: 10px;
+  color: var(--muted);
+  margin: 4px 0 0;
+  line-height: 1.6;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.toolbar input { flex: 1; }
+.toolbar select { width: auto; min-width: 140px; }
+
+.maintenance-select {
+  max-width: 135px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 7px;
+  background: white;
+  font-size: 10px;
+  color: #526057;
+}
+
+.maintenance-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.maintenance-toolbar { margin: 0 0 15px; }
+
+.maintenance-list { display: grid; gap: 10px; }
+
+.maintenance-item {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 16px;
+}
+
+.maintenance-item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.maintenance-item h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.maintenance-description {
+  margin: 7px 0 12px;
+  color: #657269;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.maintenance-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 16px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.maintenance-meta strong { color: #526057; }
+
+.maintenance-status-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 13px;
+  padding-top: 11px;
+  border-top: 1px solid #f0f2f0;
+  color: #657269;
+  font-size: 10px;
+}
+
+.report-row.is-clickable { cursor: pointer; }
+.report-row.is-clickable:hover { border-color: #a9c5ae; background: #fbfdfb; }
+.report-row.is-clickable:focus-visible { outline: 3px solid #b7d3be; outline-offset: 2px; }
+.maintenance-item.selected-report { border-color: #6d9b7c; box-shadow: 0 0 0 3px #eaf4ed; }
+
+.maintenance-item-controls {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.priority {
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.priority-normal { background: #eff1f0; color: #69756d; }
+.priority-high { background: #fff0e9; color: #a34b27; }
+
+.empty {
+  padding: 30px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.footer {
+  padding: 18px 38px;
+  background: white;
+  border-top: 1px solid var(--line);
+  color: #929d94;
+  font-size: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+#toast {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  background: #173f2d;
+  color: white;
+  border-radius: 9px;
+  padding: 13px 17px;
+  font-size: 12px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: .2s;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#toast.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 1000px) {
+  .sidebar { width: 210px; }
+  .main { margin-left: 210px; }
+  .page { padding: 28px 23px; }
+  .topbar { padding: 0 23px; }
+  .footer { padding: 18px 23px; }
+  .form-layout { grid-template-columns: 1fr; }
+  .login-panel.wide { width: min(100%, 620px); }
+  .landing-content { gap: 36px; }
+}
+
+@media (max-width: 650px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    padding: 15px;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .brand { padding: 0; }
+  .nav-label, .sidebar-bottom { display: none; }
+
+  .nav {
+    display: flex;
+    overflow-x: auto;
+    margin-top: 14px;
+  }
+
+  .nav button {
+    white-space: nowrap;
+    font-size: 11px;
+    padding: 10px;
+  }
+
+  .main { margin-left: 0; }
+
+  .landing-header { min-height: 70px; padding: 12px 15px; }
+  .landing-header-actions .secondary { display: none; }
+  .landing-content { grid-template-columns: 1fr; gap: 32px; padding: 42px 15px; }
+  .landing-copy h1 { font-size: 36px; }
+  .landing-copy > p:not(.eyebrow) { font-size: 13px; }
+  .landing-issue-grid { gap: 9px; }
+  .landing-issue { min-height: 72px; padding: 10px; gap: 8px; font-size: 11px; }
+  .landing-issue img { width: 32px; height: 32px; }
+  .landing-footer { padding: 15px; }
+
+  .topbar {
+    height: 52px;
+    padding: 0 15px;
+    font-size: 10px;
+  }
+
+  .page { padding: 24px 15px; }
+
+  .heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .heading h1 { font-size: 24px; }
+  .heading > .primary { width: 100%; }
+
+  .banner {
+    padding: 23px;
+    min-height: 205px;
+  }
+
+  .banner h2 {
+    font-size: 20px;
+    max-width: 270px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .maintenance-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .stats:not(.maintenance-stats) .card:last-child { grid-column: 1 / -1; }
+  .card { padding: 14px; }
+
+  .report-row {
+    gap: 9px;
+    padding: 11px;
+    flex-wrap: wrap;
+  }
+
+  .report-info { flex: 1 1 60%; }
+  .toolbar { flex-direction: column; }
+  .toolbar select { width: 100%; }
+
+  .maintenance-item-top { flex-direction: column; }
+  .maintenance-item-controls { width: 100%; justify-content: space-between; }
+  .maintenance-select { flex: 1; }
+  .auth-fields, .profile-grid { grid-template-columns: 1fr; }
+  .auth-fields .full { grid-column: auto; }
+  .report-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .footer {
+    padding: 15px;
+    gap: 10px;
+  }
+
+  .footer span:last-child { text-align: right; }
+}
+</style>
+</head>
+
+<body>
+
+<section class="landing-screen" aria-labelledby="landingTitle">
+  <header class="landing-header">
+    <div class="landing-brand">
+      <img class="logo" src="misc/logo_pngvariant.png" alt="">
+      <div>
+        <strong>Campus Care</strong>
+        <small>FACILITIES PORTAL</small>
+      </div>
+    </div>
+    <div class="landing-header-actions">
+      <button class="secondary" type="button" data-auth-entry="login">Log in</button>
+      <button class="primary" type="button" data-auth-entry="register">Create account</button>
+    </div>
+  </header>
+
+  <main class="landing-content">
+    <div class="landing-copy">
+      <p class="eyebrow">A BETTER CAMPUS, TOGETHER</p>
+      <h1 id="landingTitle">Care for the place where you learn.</h1>
+      <p>Campus Care connects students, faculty, and facilities teams to keep campus spaces welcoming and working well.</p>
+      <div class="landing-actions">
+        <button class="primary" type="button" data-auth-entry="login">Enter Campus Care</button>
+        <button class="secondary" type="button" data-auth-entry="register">Create an account</button>
+      </div>
+    </div>
+
+    <div class="landing-issue-grid" aria-label="Campus facilities categories">
+      <div class="landing-issue"><img src="misc/report_cleanliness.png" alt="">Cleanliness</div>
+      <div class="landing-issue"><img src="misc/report_electrical.png" alt="">Electrical</div>
+      <div class="landing-issue"><img src="misc/report_furniture.png" alt="">Furniture</div>
+      <div class="landing-issue"><img src="misc/report_equipment.png" alt="">Equipment</div>
+      <div class="landing-issue"><img src="misc/report_plumbing.png" alt="">Plumbing</div>
+      <div class="landing-issue"><img src="misc/report_safetyconcern.png" alt="">Safety concerns</div>
+    </div>
+  </main>
+
+  <footer class="landing-footer">Campus Care · Facilities Portal</footer>
+</section>
+
+<section class="login-screen" aria-labelledby="loginTitle">
+  <div class="login-panel wide">
+    <div class="login-brand">
+      <img class="logo" src="misc/logo_pngvariant.png" alt="">
+      <div>
+        <strong class="brand-name">Campus Care</strong>
+        <small class="brand-caption">FACILITIES PORTAL</small>
+      </div>
+    </div>
+    <button class="link-btn auth-back" type="button" data-auth-close>← Back to home</button>
+
+    <form class="login-card" id="accountForm">
+      <div class="account-switches" aria-label="Account type">
+        <button type="button" class="active" data-account-role="student" aria-pressed="true">Student</button>
+        <button type="button" data-account-role="faculty" aria-pressed="false">Faculty</button>
+      </div>
+
+      <div class="auth-mode-switch" aria-label="Account action">
+        <button type="button" class="active" data-auth-mode="login" aria-pressed="true">Log in</button>
+        <button type="button" data-auth-mode="register" aria-pressed="false">Register</button>
+      </div>
+
+      <div class="auth-login" id="loginFields">
+        <p class="eyebrow">WELCOME BACK</p>
+        <h1 id="loginTitle">Student sign in</h1>
+        <p>Use your username or institutional email.</p>
+        <label for="loginIdentifier">Username or institutional email</label>
+        <input id="loginIdentifier" name="loginIdentifier" autocomplete="username"
+          placeholder="Username or email" required>
+        <label for="loginPassword">Password</label>
+        <input id="loginPassword" name="loginPassword" type="password"
+          autocomplete="current-password" placeholder="Enter your password" required>
+      </div>
+
+      <div class="auth-registration" id="registrationFields" hidden>
+        <p class="eyebrow">CREATE YOUR ACCOUNT</p>
+        <h1 id="registerTitle">Student registration</h1>
+        <p>Use your institutional details to set up your profile.</p>
+        <div class="auth-fields">
+          <div>
+            <label for="registerName">Full name *</label>
+            <input id="registerName" name="fullName" autocomplete="name" required disabled>
+          </div>
+          <div>
+            <label for="registerUsername">Username *</label>
+            <input id="registerUsername" name="username" autocomplete="nickname" minlength="3" maxlength="32" required disabled>
+          </div>
+          <div class="full">
+            <label for="registerEmail">Institutional email *</label>
+            <input id="registerEmail" name="email" type="email" autocomplete="email" placeholder="you@campus.edu" required disabled>
+          </div>
+          <div class="full">
+            <label for="registerPassword">Password *</label>
+            <input id="registerPassword" name="password" type="password" autocomplete="new-password" minlength="8" required disabled>
+          </div>
+          <fieldset class="auth-fieldset full" data-role-fields="student" disabled>
+            <div class="auth-fields">
+              <div>
+                <label for="studentId">Student ID *</label>
+                <input id="studentId" name="studentId" required disabled>
+              </div>
+              <div>
+                <label for="studentCourse">Course / program *</label>
+                <input id="studentCourse" name="course" required disabled>
+              </div>
+              <div>
+                <label for="studentYear">Year level *</label>
+                <select id="studentYear" name="yearLevel" required disabled>
+                  <option value="">Select year</option>
+                  <option>1st Year</option><option>2nd Year</option>
+                  <option>3rd Year</option><option>4th Year</option>
+                  <option>5th Year or above</option>
+                </select>
+              </div>
+              <div>
+                <label for="studentPhone">Phone (optional)</label>
+                <input id="studentPhone" name="phone" type="tel" autocomplete="tel" disabled>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="auth-fieldset full" data-role-fields="faculty" disabled hidden>
+            <div class="auth-fields">
+              <div>
+                <label for="facultyId">Faculty / employee ID *</label>
+                <input id="facultyId" name="facultyId" required disabled>
+              </div>
+              <div>
+                <label for="facultyDepartment">Department *</label>
+                <input id="facultyDepartment" name="department" required disabled>
+              </div>
+              <div>
+                <label for="facultyTitle">Position / title *</label>
+                <input id="facultyTitle" name="position" required disabled>
+              </div>
+              <div>
+                <label for="facultyOffice">Office / room</label>
+                <input id="facultyOffice" name="office" disabled>
+              </div>
+              <div class="full">
+                <label for="facultyPhone">Work phone</label>
+                <input id="facultyPhone" name="phone" type="tel" autocomplete="tel" disabled>
+              </div>
+              <div class="full">
+                <label for="facultyBio">Professional bio / service notes</label>
+                <textarea id="facultyBio" name="bio" rows="3" maxlength="500" disabled></textarea>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <p class="auth-error" id="authError" role="alert" aria-live="polite"></p>
+      <button class="primary" id="accountSubmit" type="submit">Log in as Student</button>
+      <p class="login-note">Prototype accounts are stored in this browser only. Institutional identity is not verified.</p>
+    </form>
+  </div>
+</section>
+
+<aside class="sidebar">
+  <div class="brand">
+        <img class="logo" src="misc/logo_pngvariant.png" alt="Campus Care logo">
+
+    <div>
+      <strong>Campus Care</strong>
+      <small>FACILITIES PORTAL</small>
+    </div>
+  </div>
+
+  <div class="nav-label">WORKSPACE</div>
+
+  <nav>
+    <button class="active" data-page="home">⌂ &nbsp; Overview</button>
+    <button data-page="report">＋ &nbsp; Report an Issue</button>
+    <button data-page="reports">▤ &nbsp; All Reports <span class="nav-count" id="navCount">3</span></button>
+    <button data-page="history">◷ &nbsp; Report History</button>
+    <button data-page="maintenance">▦ &nbsp; Maintenance</button>
+    <button data-page="profile">◉ &nbsp; My Profile</button>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="help">
+      <strong>Need help?</strong>
+      <p>Let our campus team know if you need assistance.</p>
+      <button class="link-btn" data-page="report">Contact facilities ↗</button>
+    </div>
+
+    <div class="user">
+      <div class="avatar">JS</div>
+      <div>
+        <strong id="sidebarUsername">Campus user</strong>
+        <small id="sidebarRole">Account</small>
+      </div>
+    </div>
+    <button class="logout-button" id="logoutButton" type="button">↪ &nbsp; Log out</button>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <span>Campus / <strong id="breadcrumb">Overview</strong></span>
+    <span class="online" id="accountIndicator">● Campus services online</span>
+  </header>
+
+  <!-- OVERVIEW -->
+  <section class="page active" id="home">
+    <div class="heading">
+      <div>
+        <p class="eyebrow">CAMPUS FACILITIES</p>
+        <h1>Good afternoon, Jamie ✦</h1>
+        <p class="muted">A better campus starts with the little things. How can we help today?</p>
+      </div>
+      <button class="primary" data-page="report">＋ Report an Issue</button>
+    </div>
+
+    <div class="banner">
+      <p class="eyebrow">YOUR CAMPUS, WELL CARED FOR</p>
+      <h2>See something that needs attention?</h2>
+      <p>Help keep your campus clean, safe, and comfortable for everyone.</p>
+      <button class="light-btn" data-page="report">Create a report →</button>
+    </div>
+
+    <div class="section-row">
+      <h2 class="section-title">Your reports at a glance</h2>
+      <button class="link-btn" data-page="reports">View all reports →</button>
+    </div>
+
+    <div class="stats">
+      <article class="card">
+        <div class="stat-top">
+          <span class="stat-icon green">▤</span>
+          <span class="hint">This semester</span>
+        </div>
+        <div class="stat-number" id="totalCount">3</div>
+        <div class="stat-label">Total reports</div>
+        <div class="stat-foot">Submitted by you</div>
+      </article>
+
+      <article class="card">
+        <div class="stat-top">
+          <span class="stat-icon amber">◷</span>
+          <span class="hint">In progress</span>
+        </div>
+        <div class="stat-number" id="progressCount">1</div>
+        <div class="stat-label">Being worked on</div>
+        <div class="stat-foot">Our team is on it</div>
+      </article>
+
+      <article class="card">
+        <div class="stat-top">
+          <span class="stat-icon blue">✓</span>
+          <span class="hint">Completed</span>
+        </div>
+        <div class="stat-number" id="resolvedCount">1</div>
+        <div class="stat-label">Resolved reports</div>
+        <div class="stat-foot">Thanks for letting us know</div>
+      </article>
+    </div>
+
+    <div class="section-row">
+      <h2 class="section-title">Recent reports</h2>
+      <span class="hint">Updated just now ↻</span>
+    </div>
+
+    <div id="recentReports" class="report-list"></div>
+
+    <div class="note">
+      ✳ &nbsp; <strong>Small reports make a big difference.</strong>
+      Thank you for helping us care for our campus.
+    </div>
+  </section>
+
+  <!-- REPORT FORM -->
+  <section class="page" id="report">
+    <div class="heading">
+      <div>
+        <p class="eyebrow">CAMPUS FACILITIES</p>
+        <h1>Report an Issue</h1>
+        <p class="muted">Tell us what needs attention and our team will take it from there.</p>
+      </div>
+      <span class="hint">♧ Campus facilities reporting</span>
+    </div>
+
+    <div class="form-layout">
+      <form class="card form-card" id="reportForm">
+        <h2>Issue details</h2>
+        <p class="muted">Give us a few details so we can help.</p>
+
+        <label for="location">Location *</label>
+        <input
+          type="text"
+          id="location"
+          placeholder="e.g., Room 201, 2nd Floor, Library"
+          maxlength="100"
+          required
+        >
+
+        <label for="category">Issue category *</label>
+        <select id="category" required>
+          <option value="">Choose a category</option>
+          <option>Cleanliness</option>
+          <option>Electrical</option>
+          <option>Plumbing</option>
+          <option>Furniture</option>
+          <option>Equipment</option>
+          <option>Safety concern</option>
+          <option>Other</option>
+        </select>
+
+        <label for="description">Description *</label>
+        <textarea id="description" rows="5" minlength="8"
+          maxlength="1000" required
+          placeholder="Describe the issue and where it can be found..."></textarea>
+        <p class="hint">Include helpful details so the team can locate the issue.</p>
+
+        <label for="photo">Upload a photo (optional)</label>
+        <input id="photo" type="file" accept="image/png,image/jpeg,image/webp">
+        <p class="hint">PNG, JPG or WEBP · Maximum 5 MB</p>
+
+        <div class="form-actions">
+          <button type="button" class="secondary" data-page="home">Cancel</button>
+          <button class="primary" type="submit">↗ Submit Report</button>
+        </div>
+      </form>
+
+      <aside class="card tips">
+        <h2>What happens next?</h2>
+
+        <div class="step">
+          <span>1</span>
+          <div>
+            <strong>We receive your report</strong>
+            <p>Your issue is added to the campus queue.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <span>2</span>
+          <div>
+            <strong>Our team reviews it</strong>
+            <p>Facilities staff assess the issue and priority.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <span>3</span>
+          <div>
+            <strong>You see the progress</strong>
+            <p>Check the Reports page for status updates.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ALL REPORTS -->
+  <section class="page" id="reports">
+    <div class="heading">
+      <div>
+        <p class="eyebrow">YOUR ACTIVITY</p>
+        <h1>All Reports</h1>
+        <p class="muted">A complete view of reported campus issues.</p>
+      </div>
+      <button class="primary" data-page="report">＋ New Report</button>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search reports..." aria-label="Search reports">
+        <select id="filter" aria-label="Filter status">
+          <option value="All">All statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+          <option value="Dismissed">Dismissed</option>
+        </select>
+      </div>
+
+      <div id="allReports" class="report-list"></div>
+    </div>
+  </section>
+
+  <section class="page" id="history">
+    <div class="heading">
+      <div>
+        <p class="eyebrow">REPORT RECORDS</p>
+        <h1>Report History</h1>
+        <p class="muted">Review submission details, status updates, and completion dates.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="toolbar">
+        <input id="historySearch" type="search" placeholder="Search report history..." aria-label="Search report history">
+      </div>
+      <div id="historyReports" class="report-list"></div>
+    </div>
+  </section>
+
+  <!-- MAINTENANCE -->
+  <section class="page" id="maintenance">
+    <div class="heading">
+      <div>
+        <p class="eyebrow">FACILITIES TEAM</p>
+        <h1>Maintenance Dashboard</h1>
+        <p class="muted">Monitor campus issues and update their progress.</p>
+      </div>
+      <span class="hint">● Live overview</span>
+    </div>
+
+    <div class="stats maintenance-stats">
+      <article class="card">
+        <span class="stat-icon green">▤</span>
+        <div class="stat-number" id="mTotal">3</div>
+        <div class="stat-label">Total reports</div>
+      </article>
+      <article class="card">
+        <span class="stat-icon amber">◷</span>
+        <div class="stat-number" id="mPending">1</div>
+        <div class="stat-label">Awaiting review</div>
+      </article>
+      <article class="card">
+        <span class="stat-icon amber">↻</span>
+        <div class="stat-number" id="mProgress">1</div>
+        <div class="stat-label">In progress</div>
+      </article>
+      <article class="card">
+        <span class="stat-icon blue">✓</span>
+        <div class="stat-number" id="mResolved">1</div>
+        <div class="stat-label">Resolved</div>
+      </article>
+    </div>
+
+    <div class="toolbar maintenance-toolbar">
+      <input class="maintenance-search" id="maintenanceSearch"
+        type="search" placeholder="Search issue, location or team..."
+        aria-label="Search maintenance reports">
+      <select id="maintenanceFilter" aria-label="Filter maintenance status">
+        <option value="All">All statuses</option>
+        <option value="Pending">Awaiting review</option>
+        <option value="In Progress">In progress</option>
+        <option value="Resolved">Resolved</option>
+        <option value="Dismissed">Dismissed</option>
+      </select>
+    </div>
+
+    <div id="maintenanceReports" class="maintenance-list"></div>
+
+    <p class="hint">Status updates and assignments are sample data stored in this browser session.</p>
+  </section>
+
+  <section class="page" id="profile">
+    <div class="heading">
+      <div>
+        <p class="eyebrow">ACCOUNT DETAILS</p>
+        <h1>My Profile</h1>
+        <p class="muted">Your account and institutional details.</p>
+      </div>
+      <span class="hint" id="profileRoleBadge"></span>
+    </div>
+    <div id="profileContent"></div>
+  </section>
+
+  <footer class="footer">
+    <span>© 2026 Campus Care</span>
+    <span>Made for a cleaner, safer campus ✳</span>
+  </footer>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+function sampleTimestamp(daysAgo, hours, minutes) {
+  const date = new Date();
+  date.setDate(date.getDate() - daysAgo);
+  date.setHours(hours, minutes, 0, 0);
+  return date.toISOString();
+}
+
+const sampleReports = [
+  {
+    id: 1,
+    title: "Trash on the floor",
+    location: "Main Building",
+    category: "Cleanliness",
+    description: "Loose trash was reported along the east entrance walkway and needs collection.",
+    team: "Custodial Services",
+    priority: "Normal",
+    status: "In Progress",
+    date: sampleTimestamp(0, 10, 24),
+    updated: sampleTimestamp(0, 10, 24)
+  },
+  {
+    id: 2,
+    title: "Overflowing trash bins",
+    location: "Canteen",
+    category: "Cleanliness",
+    description: "The bins beside the dining area are full and need to be emptied.",
+    team: "Custodial Services",
+    priority: "Normal",
+    status: "Pending",
+    date: sampleTimestamp(0, 9, 12),
+    updated: sampleTimestamp(0, 9, 12)
+  },
+  {
+    id: 3,
+    title: "Dirty tables",
+    location: "Library",
+    category: "Cleanliness",
+    description: "Several study tables on the first floor need wiping before the next use.",
+    team: "Custodial Services",
+    priority: "Normal",
+    status: "Resolved",
+    date: sampleTimestamp(1, 16, 32),
+    updated: sampleTimestamp(1, 16, 32)
+  }
+];
+
+const categoryIcons = {
+  Cleanliness: "misc/report_cleanliness.png",
+  Electrical: "misc/report_electrical.png",
+  Equipment: "misc/report_equipment.png",
+  Furniture: "misc/report_furniture.png",
+  Plumbing: "misc/report_plumbing.png",
+  "Safety concern": "misc/report_safetyconcern.png"
+};
+
+const $ = id => document.getElementById(id);
+const accountsStorageKey = "campusCareAccounts";
+const activeAccountStorageKey = "campusCareActiveAccount";
+const reportsStorageKey = "campusCareReports";
+let activeAccount = null;
+let selectedReportId = null;
+
+function loadReports() {
+  let storedReports = null;
+  try {
+    storedReports = JSON.parse(localStorage.getItem(reportsStorageKey) || "null");
+  } catch {
+    storedReports = null;
+  }
+
+  const savedReports = Array.isArray(storedReports) ? storedReports : sampleReports;
+  savedReports.forEach(prepareReportHistory);
+  return savedReports;
+}
+
+const reports = loadReports();
+
+function getAccounts() {
+  try {
+    return JSON.parse(localStorage.getItem(accountsStorageKey) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveAccounts(accounts) {
+  localStorage.setItem(accountsStorageKey, JSON.stringify(accounts));
+}
+
+async function hashPassword(password, salt) {
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"]
+  );
+  const bits = await crypto.subtle.deriveBits({
+    name: "PBKDF2",
+    salt: Uint8Array.from(atob(salt), char => char.charCodeAt(0)),
+    iterations: 120000,
+    hash: "SHA-256"
+  }, key, 256);
+
+  return Array.from(new Uint8Array(bits), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function createSalt() {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return btoa(String.fromCharCode(...bytes));
+}
+
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function statusClass(status) {
+  if (status === "Resolved") return "resolved";
+  if (status === "Dismissed") return "dismissed";
+  if (status === "In Progress") return "inprogress";
+  return "pending";
+}
+
+function statusDescription(status) {
+  const descriptions = {
+    Pending: "Awaiting facilities review and assignment.",
+    "In Progress": "The assigned team is working on this issue.",
+    Resolved: "Work is marked complete and the report is closed.",
+    Dismissed: "Facilities reviewed this report and closed it without further work."
+  };
+
+  return descriptions[status] || "Status update pending.";
+}
+
+function formatDateTime(value) {
+  if (!value) return "Not recorded";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(date);
+}
+
+function normalizeLegacyTimestamp(value) {
+  const match = String(value || "").match(/^(Today|Yesterday), (\d{1,2}):(\d{2}) (AM|PM)$/);
+  if (!match) return value;
+
+  const date = new Date();
+  if (match[1] === "Yesterday") date.setDate(date.getDate() - 1);
+  const hour = Number(match[2]) % 12 + (match[4] === "PM" ? 12 : 0);
+  date.setHours(hour, Number(match[3]), 0, 0);
+  return date.toISOString();
+}
+
+function saveReports() {
+  localStorage.setItem(reportsStorageKey, JSON.stringify(reports));
+}
+
+function reportActor() {
+  return activeAccount?.profile.fullName || activeAccount?.username || "Facilities team";
+}
+
+function prepareReportHistory(report) {
+  const submittedAt = normalizeLegacyTimestamp(report.submittedAt || report.date) || new Date().toISOString();
+  const updatedAt = normalizeLegacyTimestamp(report.updatedAt || report.updated) || submittedAt;
+  report.submittedAt = submittedAt;
+  report.updatedAt = updatedAt;
+  report.dismissedBy = Array.isArray(report.dismissedBy) ? report.dismissedBy : [];
+
+  if (!Array.isArray(report.history)) {
+    report.history = [{
+      type: "submitted",
+      label: "Report submitted",
+      detail: "Report added to the campus facilities queue.",
+      actor: "Reporter",
+      at: submittedAt
+    }];
+
+    if (report.status !== "Pending") {
+      report.history.push({
+        type: "status",
+        label: `Status recorded as ${report.status}`,
+        detail: statusDescription(report.status),
+        actor: "Facilities team",
+        at: updatedAt
+      });
+    }
+  }
+
+  report.history.forEach(event => {
+    event.at = normalizeLegacyTimestamp(event.at) || event.at;
+  });
+  if (report.resolvedAt) {
+    report.resolvedAt = normalizeLegacyTimestamp(report.resolvedAt);
+  }
+  if (report.dismissedAt) {
+    report.dismissedAt = normalizeLegacyTimestamp(report.dismissedAt);
+  }
+  if (report.status === "Resolved" && !report.resolvedAt) {
+    report.resolvedAt = updatedAt;
+  }
+  if (report.status === "Dismissed" && !report.dismissedAt) {
+    report.dismissedAt = updatedAt;
+  }
+}
+
+function updateReportStatus(report, status) {
+  const timestamp = new Date().toISOString();
+  report.status = status;
+  report.updatedAt = timestamp;
+  report.updated = timestamp;
+  if (status === "Resolved") report.resolvedAt = timestamp;
+  if (status === "Dismissed") report.dismissedAt = timestamp;
+  report.history.push({
+    type: "status",
+    label: `Status changed to ${status}`,
+    detail: statusDescription(status),
+    actor: reportActor(),
+    at: timestamp
+  });
+  saveReports();
+}
+
+function reportHistoryDetails(report) {
+  const events = [...(report.history || [])].sort((left, right) => {
+    const leftTime = new Date(left.at).getTime();
+    const rightTime = new Date(right.at).getTime();
+    return (Number.isNaN(leftTime) ? 0 : leftTime) -
+      (Number.isNaN(rightTime) ? 0 : rightTime);
+  });
+
+  return `
+    <details class="report-history">
+      <summary>Full details and update history</summary>
+      <div class="report-history-body">
+        <dl class="report-detail-grid">
+          <div><dt>Location</dt><dd>${escapeHTML(report.location)}</dd></div>
+          <div><dt>Category</dt><dd>${escapeHTML(report.category)}</dd></div>
+          <div><dt>Assigned team</dt><dd>${escapeHTML(report.team || teamForCategory(report.category))}</dd></div>
+          <div><dt>Priority</dt><dd>${escapeHTML(report.priority || "Normal")}</dd></div>
+          <div><dt>Submitted</dt><dd>${escapeHTML(formatDateTime(report.submittedAt))}</dd></div>
+          <div><dt>Last updated</dt><dd>${escapeHTML(formatDateTime(report.updatedAt))}</dd></div>
+          <div><dt>Resolved / completed</dt><dd>${escapeHTML(formatDateTime(report.resolvedAt))}</dd></div>
+          <div><dt>Dismissed by facilities</dt><dd>${escapeHTML(formatDateTime(report.dismissedAt))}</dd></div>
+          <div class="full"><dt>Description</dt><dd>${escapeHTML(report.description || report.title)}</dd></div>
+        </dl>
+        <div class="history-timeline" aria-label="Report update history">
+          ${events.map(item => `
+            <div class="history-event">
+              <strong>${escapeHTML(item.label)}</strong>
+              <time datetime="${escapeHTML(item.at)}">${escapeHTML(formatDateTime(item.at))}</time>
+              <p>${escapeHTML(item.detail)} · ${escapeHTML(item.actor)}</p>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    </details>
+  `;
+}
+
+function teamForCategory(category) {
+  const teams = {
+    Cleanliness: "Custodial Services",
+    Electrical: "Electrical Services",
+    Plumbing: "Plumbing Services",
+    Furniture: "Campus Maintenance",
+    Equipment: "Campus Maintenance",
+    "Safety concern": "Campus Safety",
+    Other: "Facilities Team"
+  };
+
+  return teams[category] || "Facilities Team";
+}
+
+function maintenanceCard(report) {
+  const priorityClass = report.priority === "High" ? "priority-high" : "priority-normal";
+  const canManage = activeAccount?.role === "faculty";
+  const selected = report.id === selectedReportId ? " selected-report" : "";
+
+  return `
+    <article class="maintenance-item${selected}" data-report-id="${report.id}">
+      <div class="maintenance-item-top">
+        <div>
+          <h2>${escapeHTML(report.title)}</h2>
+          <p class="maintenance-description">${escapeHTML(report.description || report.title)}</p>
+          <div class="maintenance-meta">
+            <span>⌖ <strong>${escapeHTML(report.location)}</strong></span>
+            <span>Category: <strong>${escapeHTML(report.category)}</strong></span>
+            <span>Assigned team: <strong>${escapeHTML(report.team || teamForCategory(report.category))}</strong></span>
+            <span>Submitted: <strong>${escapeHTML(formatDateTime(report.submittedAt))}</strong></span>
+            <span>Updated: <strong>${escapeHTML(formatDateTime(report.updatedAt))}</strong></span>
+            ${report.resolvedAt ? `<span>Completed: <strong>${escapeHTML(formatDateTime(report.resolvedAt))}</strong></span>` : ""}
+          </div>
+        </div>
+        <div class="maintenance-item-controls">
+          <span class="priority ${priorityClass}">${escapeHTML(report.priority || "Normal")} priority</span>
+          ${canManage
+            ? `<select class="maintenance-select" data-id="${report.id}"
+                 aria-label="Update status for ${escapeHTML(report.title)}">
+                 ${["Pending", "In Progress", "Resolved", "Dismissed"].map(status => `
+                   <option value="${status}" ${report.status === status ? "selected" : ""}>
+                     ${status === "Pending" ? "Awaiting review" : status}
+                   </option>
+                 `).join("")}
+               </select>`
+            : `<span class="status ${statusClass(report.status)}">${escapeHTML(report.status === "Pending" ? "Awaiting review" : report.status)}</span>`}
+        </div>
+      </div>
+      <div class="maintenance-status-line">
+        <span class="status ${statusClass(report.status)}">${escapeHTML(report.status === "Pending" ? "Awaiting review" : report.status)}</span>
+        <span>${escapeHTML(statusDescription(report.status))}</span>
+      </div>
+      ${reportHistoryDetails(report)}
+    </article>
+  `;
+}
+
+function reportCard(report, clickable = false) {
+  const isStudent = activeAccount?.role === "student";
+  const canDismiss = isStudent && ["Resolved", "Dismissed"].includes(report.status) &&
+    !report.dismissedBy?.includes(activeAccount.id);
+
+  return `
+    <article class="report-row">
+      <div class="report-icon">${categoryIcons[report.category]
+        ? `<img src="${categoryIcons[report.category]}" alt="">`
+        : "⌖"}</div>
+
+      <div class="report-info">
+        <strong>${escapeHTML(report.title)}</strong>
+        <p>
+          ⌖ ${escapeHTML(report.location)} ·
+          ${escapeHTML(report.category)} ·
+          Submitted ${escapeHTML(formatDateTime(report.submittedAt))}
+        </p>
+      </div>
+
+      <div class="report-actions">
+        ${clickable ? `<button class="secondary" type="button" data-open-maintenance="true" data-report-id="${report.id}">View in Maintenance</button>` : ""}
+        <span class="status ${statusClass(report.status)}">
+          ${escapeHTML(report.status === "Pending" ? "Awaiting review" : report.status)}
+        </span>
+        ${canDismiss ? `<button class="secondary" type="button" data-dismiss-report="${report.id}">Hide from my reports</button>` : ""}
+      </div>
+      ${reportHistoryDetails(report)}
+    </article>
+  `;
+}
+
+function showToast(message) {
+  const toast = $("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2800);
+}
+
+function currentRole() {
+  return document.querySelector("[data-account-role].active")?.dataset.accountRole || "student";
+}
+
+function setAuthMode(mode) {
+  const isRegistering = mode === "register";
+  const role = currentRole();
+  const loginFields = $("loginFields");
+  const registrationFields = $("registrationFields");
+
+  loginFields.hidden = isRegistering;
+  registrationFields.hidden = !isRegistering;
+  loginFields.querySelectorAll("input").forEach(input => {
+    input.disabled = isRegistering;
+    input.required = !isRegistering;
+  });
+  registrationFields.querySelectorAll("input, select, textarea").forEach(input => {
+    input.disabled = !isRegistering ||
+      (input.closest("[data-role-fields]") && input.closest("[data-role-fields]").dataset.roleFields !== role);
+  });
+  registrationFields.querySelectorAll("[data-role-fields]").forEach(fieldset => {
+    const isCurrentRole = fieldset.dataset.roleFields === role;
+    fieldset.hidden = !isCurrentRole;
+    fieldset.disabled = !isRegistering || !isCurrentRole;
+  });
+  document.querySelectorAll("[data-auth-mode]").forEach(button => {
+    const selected = button.dataset.authMode === mode;
+    button.classList.toggle("active", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+
+  $("loginTitle").textContent = `${role === "student" ? "Student" : "Faculty"} sign in`;
+  $("registerTitle").textContent = `${role === "student" ? "Student" : "Faculty"} registration`;
+  $("accountSubmit").textContent = isRegistering ? "Create account" : `Log in as ${role === "student" ? "Student" : "Faculty"}`;
+  $("authError").textContent = "";
+  document.querySelector(".login-panel").classList.toggle("wide", isRegistering);
+}
+
+function renderProfile() {
+  if (!activeAccount) return;
+
+  const { role, username, email, profile } = activeAccount;
+  const isFaculty = role === "faculty";
+  const items = isFaculty
+    ? [
+        ["Full name", profile.fullName],
+        ["Username", username],
+        ["Institutional email", email],
+        ["Faculty / employee ID", profile.facultyId],
+        ["Department", profile.department],
+        ["Position / title", profile.position],
+        ["Office / room", profile.office],
+        ["Work phone", profile.phone],
+        ["Professional bio / service notes", profile.bio]
+      ]
+    : [
+        ["Full name", profile.fullName],
+        ["Username", username],
+        ["Institutional email", email],
+        ["Student ID", profile.studentId],
+        ["Course / program", profile.course],
+        ["Year level", profile.yearLevel],
+        ["Phone", profile.phone]
+      ];
+
+  $("profileRoleBadge").textContent = isFaculty ? "Faculty account" : "Student account";
+  $("profileContent").innerHTML = `
+    <section class="card">
+      <h2 class="section-title">${isFaculty ? "Faculty information" : "Student information"}</h2>
+      <div class="profile-grid">
+        ${items.map(([label, value]) => `
+          <div class="profile-field">
+            <span>${escapeHTML(label)}</span>
+            <strong>${escapeHTML(value || "Not provided")}</strong>
+          </div>
+        `).join("")}
+      </div>
+    </section>
+    ${isFaculty ? `
+      <section class="card faculty-tools">
+        <h2 class="section-title">Facilities team access</h2>
+        <p class="muted">Faculty demo accounts can review every campus report, filter the queue, and update issue statuses in Maintenance.</p>
+        <button class="secondary" type="button" data-page="maintenance">Open Maintenance dashboard</button>
+      </section>
+    ` : `
+      <p class="hint" style="margin-top:14px">Your profile details are visible to you in this local demo.</p>
+    `}
+  `;
+}
+
+function updateAccountIdentity() {
+  if (!activeAccount) return;
+
+  const name = activeAccount.profile.fullName || activeAccount.username;
+  const initials = name.split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase();
+  $("sidebarUsername").textContent = activeAccount.username;
+  $("sidebarRole").textContent = activeAccount.role === "faculty" ? "Faculty account" : "Student account";
+  $("accountIndicator").textContent = `● Campus services online · ${activeAccount.username}`;
+  document.querySelector(".avatar").textContent = initials;
+  document.querySelector("#home h1").textContent = `Welcome, ${name}`;
+  renderProfile();
+}
+
+function startSession(account) {
+  activeAccount = account;
+  localStorage.setItem(activeAccountStorageKey, account.id);
+  document.body.classList.remove("auth-open");
+  document.body.classList.add("signed-in");
+  updateAccountIdentity();
+  render();
+  showToast(`Welcome, ${account.username}.`);
+}
+
+function endSession() {
+  localStorage.removeItem(activeAccountStorageKey);
+  activeAccount = null;
+  document.body.classList.remove("signed-in");
+  document.body.classList.remove("auth-open");
+  navigate("home");
+  $("accountForm").reset();
+  setAuthMode("login");
+}
+
+async function handleAccountSubmit(event) {
+  event.preventDefault();
+  const role = currentRole();
+  const isRegistering = !$("registrationFields").hidden;
+  const error = $("authError");
+  error.textContent = "";
+
+  try {
+    if (!crypto?.subtle) {
+      throw new Error("Secure password hashing is unavailable in this browser context. Open the demo from localhost to continue.");
+    }
+
+    const accounts = getAccounts();
+    if (isRegistering) {
+      const formData = new FormData(event.currentTarget);
+      const username = String(formData.get("username")).trim();
+      const email = String(formData.get("email")).trim().toLowerCase();
+      const password = String(formData.get("password"));
+      const duplicate = accounts.some(account => account.role === role &&
+        (account.username.toLowerCase() === username.toLowerCase() || account.email === email));
+
+      if (duplicate) {
+        throw new Error("That username or institutional email is already registered for this account type.");
+      }
+
+      const salt = createSalt();
+      const account = {
+        id: crypto.randomUUID(),
+        role,
+        username,
+        email,
+        passwordSalt: salt,
+        passwordHash: await hashPassword(password, salt),
+        profile: role === "student"
+          ? {
+              fullName: String(formData.get("fullName")).trim(),
+              studentId: String(formData.get("studentId")).trim(),
+              course: String(formData.get("course")).trim(),
+              yearLevel: String(formData.get("yearLevel")),
+              phone: String(formData.get("phone") || "").trim()
+            }
+          : {
+              fullName: String(formData.get("fullName")).trim(),
+              facultyId: String(formData.get("facultyId")).trim(),
+              department: String(formData.get("department")).trim(),
+              position: String(formData.get("position")).trim(),
+              office: String(formData.get("office") || "").trim(),
+              phone: String(formData.get("phone") || "").trim(),
+              bio: String(formData.get("bio") || "").trim()
+            }
+      };
+
+      accounts.push(account);
+      saveAccounts(accounts);
+      startSession(account);
+      return;
+    }
+
+    const identifier = $("loginIdentifier").value.trim().toLowerCase();
+    const password = $("loginPassword").value;
+    const account = accounts.find(item => item.role === role &&
+      (item.username.toLowerCase() === identifier || item.email === identifier));
+
+    if (!account || await hashPassword(password, account.passwordSalt) !== account.passwordHash) {
+      throw new Error(`No matching ${role} account was found. Check the account type and sign-in details.`);
+    }
+
+    startSession(account);
+  } catch (error) {
+    $("authError").textContent = error.message || "Unable to complete this account action.";
+  }
+}
+
+function render() {
+  const total = reports.length;
+  const pending = reports.filter(r => r.status === "Pending").length;
+  const progress = reports.filter(r => r.status === "In Progress").length;
+  const resolved = reports.filter(r => r.status === "Resolved").length;
+  const isStudent = activeAccount?.role === "student";
+  const visibleReports = isStudent
+    ? reports.filter(report => !report.dismissedBy.includes(activeAccount.id))
+    : reports;
+
+  [
+    ["totalCount", total],
+    ["progressCount", progress],
+    ["resolvedCount", resolved],
+    ["mTotal", total],
+    ["mPending", pending],
+    ["mProgress", progress],
+    ["mResolved", resolved],
+    ["navCount", total]
+  ].forEach(([id, number]) => {
+    $(id).textContent = number;
+  });
+
+  $("recentReports").innerHTML = visibleReports
+    .slice(0, 3)
+    .map(report => reportCard(report, true))
+    .join("");
+
+  const query = $("search").value.toLowerCase().trim();
+  const filter = $("filter").value;
+
+  const filtered = visibleReports.filter(report => {
+    const text =
+      `${report.title} ${report.location} ${report.category}`.toLowerCase();
+
+    return text.includes(query) &&
+      (filter === "All" || report.status === filter);
+  });
+
+  $("allReports").innerHTML = filtered.length
+    ? filtered.map(report => reportCard(report)).join("")
+    : '<div class="empty">No reports match your search.</div>';
+
+  const historyQuery = $("historySearch").value.toLowerCase().trim();
+  const historyReports = reports.filter(report => {
+    const text = `${report.title} ${report.description || ""} ${report.location} ${report.category} ${report.status}`.toLowerCase();
+    return text.includes(historyQuery);
+  });
+  $("historyReports").innerHTML = historyReports.length
+    ? historyReports.map(report => reportCard(report)).join("")
+    : '<div class="empty">No report history matches your search.</div>';
+
+  const maintenanceQuery =
+    $("maintenanceSearch").value.toLowerCase().trim();
+  const maintenanceFilter = $("maintenanceFilter").value;
+
+  const maintenanceFiltered = reports.filter(report => {
+    const text =
+      `${report.title} ${report.description || ""} ${report.location} ${report.category} ${report.team || teamForCategory(report.category)}`.toLowerCase();
+
+    return text.includes(maintenanceQuery) &&
+      (maintenanceFilter === "All" || report.status === maintenanceFilter);
+  });
+
+  $("maintenanceReports").innerHTML = maintenanceFiltered.length
+    ? maintenanceFiltered.map(maintenanceCard).join("")
+    : '<div class="empty">No issues match your search.</div>';
+
+  renderProfile();
+}
+
+function navigate(page) {
+  document.querySelectorAll(".page").forEach(section => {
+    section.classList.toggle("active", section.id === page);
+  });
+
+  document.querySelectorAll("nav button").forEach(button => {
+    button.classList.toggle("active", button.dataset.page === page);
+  });
+
+  const labels = {
+    home: "Overview",
+    report: "Report an Issue",
+    reports: "All Reports",
+    history: "Report History",
+    maintenance: "Maintenance",
+    profile: "My Profile"
+  };
+
+  $("breadcrumb").textContent = labels[page] || "Overview";
+
+  if (page === "reports" || page === "history" || page === "maintenance") {
+    render();
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.addEventListener("click", event => {
+  const authEntry = event.target.closest("[data-auth-entry]");
+  if (authEntry) {
+    document.body.classList.add("auth-open");
+    setAuthMode(authEntry.dataset.authEntry);
+    return;
+  }
+
+  if (event.target.closest("[data-auth-close]")) {
+    document.body.classList.remove("auth-open");
+    setAuthMode("login");
+    return;
+  }
+
+  const reportRow = event.target.closest("[data-open-maintenance]");
+  if (reportRow && event.target.closest("[data-dismiss-report], .report-history")) return;
+  if (reportRow) {
+    selectedReportId = Number(reportRow.dataset.reportId);
+    navigate("maintenance");
+    render();
+    return;
+  }
+
+  const button = event.target.closest("[data-page]");
+
+  if (button) {
+    event.preventDefault();
+    navigate(button.dataset.page);
+  }
+});
+
+document.addEventListener("keydown", event => {
+  if ((event.key === "Enter" || event.key === " ") && event.target.matches("[data-open-maintenance]")) {
+    event.preventDefault();
+    selectedReportId = Number(event.target.dataset.reportId);
+    navigate("maintenance");
+    render();
+  }
+});
+
+document.querySelectorAll("[data-account-role]").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("[data-account-role]").forEach(option => {
+      const selected = option === button;
+      option.classList.toggle("active", selected);
+      option.setAttribute("aria-pressed", String(selected));
+    });
+    setAuthMode(document.querySelector("[data-auth-mode].active").dataset.authMode);
+  });
+});
+
+document.querySelectorAll("[data-auth-mode]").forEach(button => {
+  button.addEventListener("click", () => setAuthMode(button.dataset.authMode));
+});
+
+$("accountForm").addEventListener("submit", handleAccountSubmit);
+$("logoutButton").addEventListener("click", endSession);
+
+$("search").addEventListener("input", render);
+$("filter").addEventListener("change", render);
+$("historySearch").addEventListener("input", render);
+$("maintenanceSearch").addEventListener("input", render);
+$("maintenanceFilter").addEventListener("change", render);
+
+document.addEventListener("change", event => {
+  if (!event.target.matches("[data-id]")) return;
+
+  const report = reports.find(
+    item => item.id === Number(event.target.dataset.id)
+  );
+
+  if (report && activeAccount?.role === "faculty") {
+    updateReportStatus(report, event.target.value);
+    render();
+    showToast(`Status updated to ${report.status}.`);
+  }
+});
+
+document.addEventListener("click", event => {
+  const dismissButton = event.target.closest("[data-dismiss-report]");
+  if (!dismissButton || activeAccount?.role !== "student") return;
+
+  const report = reports.find(item => item.id === Number(dismissButton.dataset.dismissReport));
+  if (!report || !["Resolved", "Dismissed"].includes(report.status)) return;
+  if (report.dismissedBy.includes(activeAccount.id)) return;
+
+  const timestamp = new Date().toISOString();
+  report.dismissedBy.push(activeAccount.id);
+  report.updatedAt = timestamp;
+  report.updated = timestamp;
+  report.history.push({
+    type: "hidden",
+    label: "Report hidden from active reports",
+    detail: "Student dismissed this closed report from the active list.",
+    actor: reportActor(),
+    at: timestamp
+  });
+  saveReports();
+  render();
+  showToast("Report moved to Report History.");
+});
+
+$("photo").addEventListener("change", event => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const validTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
+
+  if (!validTypes.includes(file.type) ||
+      file.size > 5 * 1024 * 1024) {
+    event.target.value = "";
+    showToast("Choose a JPG, PNG or WEBP photo under 5 MB.");
+  }
+});
+
+$("reportForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const location = $("location").value.trim();
+  const category = $("category").value;
+  const description = $("description").value.trim();
+
+  if (!location || !category || description.length < 8) {
+    showToast("Please complete all required fields.");
+    return;
+  }
+
+  const submittedAt = new Date().toISOString();
+  reports.unshift({
+    id: Date.now(),
+    title: description.length > 44
+      ? description.slice(0, 41) + "..."
+      : description,
+    location,
+    category,
+    description,
+    team: teamForCategory(category),
+    priority: category === "Safety concern" ? "High" : "Normal",
+    status: "Pending",
+    date: submittedAt,
+    updated: submittedAt,
+    submittedAt,
+    updatedAt: submittedAt,
+    dismissedBy: [],
+    history: [{
+      type: "submitted",
+      label: "Report submitted",
+      detail: "Report added to the campus facilities queue.",
+      actor: reportActor(),
+      at: submittedAt
+    }]
+  });
+
+  $("reportForm").reset();
+
+  saveReports();
+  render();
+  navigate("reports");
+  showToast("Your report was submitted successfully!");
+});
+
+render();
+saveReports();
+setAuthMode("login");
+
+const savedAccountId = localStorage.getItem(activeAccountStorageKey);
+activeAccount = getAccounts().find(account => account.id === savedAccountId) || null;
+if (activeAccount) {
+  document.body.classList.add("signed-in");
+  updateAccountIdentity();
+  render();
+} else {
+  localStorage.removeItem(activeAccountStorageKey);
+}
+</script>
+</body>
+</html>
